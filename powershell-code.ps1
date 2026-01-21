@@ -1,98 +1,151 @@
-# conscientizacao-seguranca-profissional.ps1
-# Interface estilo terminal (CMD / PowerShell)
-
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
-# Mensagem
+# ================================
+# CONFIGURAÇÕES VISUAIS
+# ================================
+$bgColor   = [System.Drawing.Color]::Black
+$textColor = [System.Drawing.Color]::Lime
+$font      = New-Object System.Drawing.Font("Consolas", 11)
+
+# ================================
+# FORM PRINCIPAL (FULLSCREEN)
+# ================================
+$form = New-Object System.Windows.Forms.Form
+$form.Text = "SOC TERMINAL - SECURITY AWARENESS"
+$form.WindowState = "Maximized"
+$form.FormBorderStyle = "None"
+$form.TopMost = $true
+$form.BackColor = $bgColor
+$form.ForeColor = $textColor
+$form.Font = $font
+$form.Icon = [System.Drawing.SystemIcons]::Shield
+
+# ================================
+# TEXTBOX TERMINAL
+# ================================
+$terminal = New-Object System.Windows.Forms.TextBox
+$terminal.Multiline = $true
+$terminal.ReadOnly = $true
+$terminal.ScrollBars = "Vertical"
+$terminal.Dock = "Fill"
+$terminal.BackColor = $bgColor
+$terminal.ForeColor = $textColor
+$terminal.BorderStyle = "None"
+$terminal.Font = $font
+$form.Controls.Add($terminal)
+
+# ================================
+# FUNÇÃO: EFEITO DE DIGITAÇÃO
+# ================================
+function Write-Terminal {
+    param (
+        [string]$Text,
+        [int]$Delay = 20
+    )
+
+    foreach ($char in $Text.ToCharArray()) {
+        $terminal.AppendText($char)
+        Start-Sleep -Milliseconds $Delay
+        $terminal.Refresh()
+    }
+}
+
+# ================================
+# FUNÇÃO: LOG SOC
+# ================================
+function Write-Log {
+    param (
+        [string]$Level,
+        [string]$Message
+    )
+
+    $timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+    Write-Terminal "[$timestamp] [$Level] $Message`r`n" 5
+}
+
+# ================================
+# INICIALIZAÇÃO
+# ================================
+$form.Show()
+$form.Refresh()
+
+Write-Terminal "Initializing SOC Security Awareness Console...`r`n`r`n" 15
+Start-Sleep 1
+
+Write-Log "INFO"  "Loading security modules"
+Start-Sleep 1
+Write-Log "INFO"  "Checking endpoint posture"
+Start-Sleep 1
+Write-Log "INFO"  "Validating user security awareness baseline"
+Start-Sleep 1
+Write-Log "OK"    "All systems operational"
+Start-Sleep 1
+
+Write-Terminal "`r`n--- SECURITY AWARENESS MESSAGE ---`r`n`r`n" 15
+
+# ================================
+# MENSAGEM PRINCIPAL
+# ================================
 $mensagem = @"
 Prezado usuário,
 
-A segurança digital é uma responsabilidade compartilhada.
-Pequenas ações diárias fazem grande diferença.
+A segurança da informação é uma responsabilidade compartilhada.
 
-DICAS ESSENCIAIS DE CIBERSEGURANÇA:
+A maioria dos incidentes de segurança ocorre por:
+- Phishing
+- Senhas fracas
+- Falta de MFA
+- Sistemas desatualizados
+- Uso de dispositivos USB desconhecidos
 
-[1] Não clique em links ou anexos suspeitos
-[2] Utilize senhas fortes e exclusivas
-[3] Ative MFA sempre que possível
-[4] Mantenha sistemas e softwares atualizados
-[5] Nunca utilize USBs desconhecidos
+Ferramentas como FortSecure e Kaspersky fornecem
+camadas avançadas de proteção, porém:
 
-Soluções como FortSecure e Kaspersky
-fornecem proteção avançada, porém
-o fator humano continua sendo o mais crítico.
+>>> O USUÁRIO CONTINUA SENDO O PRINCIPAL ELEMENTO DE DEFESA <<<
 
-Atenciosamente,
-Equipe de Conscientização em Cibersegurança
+Pratique segurança. Questione. Reporte.
+
+SOC - Security Operations Center
 "@
 
-# Janela principal
-$form = New-Object System.Windows.Forms.Form
-$form.Text = "Security Awareness Console"
-$form.Size = New-Object System.Drawing.Size(650,450)
-$form.StartPosition = "CenterScreen"
-$form.FormBorderStyle = "FixedDialog"
-$form.MaximizeBox = $false
-$form.MinimizeBox = $false
-$form.BackColor = [System.Drawing.Color]::Black
-$form.ForeColor = [System.Drawing.Color]::Lime
-$form.Font = New-Object System.Drawing.Font("Consolas", 10)
+Write-Terminal $mensagem 18
 
-# Caixa de texto estilo terminal
-$textBox = New-Object System.Windows.Forms.TextBox
-$textBox.Location = New-Object System.Drawing.Point(15,15)
-$textBox.Size = New-Object System.Drawing.Size(605,320)
-$textBox.Multiline = $true
-$textBox.ReadOnly = $true
-$textBox.ScrollBars = "Vertical"
-$textBox.BackColor = [System.Drawing.Color]::Black
-$textBox.ForeColor = [System.Drawing.Color]::Lime
-$textBox.BorderStyle = "FixedSingle"
-$textBox.Font = New-Object System.Drawing.Font("Consolas", 10)
-$textBox.Text = $mensagem
-$form.Controls.Add($textBox)
+# ================================
+# LOGS FINAIS
+# ================================
+Start-Sleep 1
+Write-Log "INFO" "Security awareness message delivered successfully"
+Write-Log "INFO" "Monitoring continues..."
 
-# Função para criar botões estilo terminal
-function New-TerminalButton {
-    param ($Text, $X, $Y, $Width)
+# ================================
+# TECLA PARA SAIR (STEALTH)
+# ================================
+Write-Terminal "`r`nPressione ESC para encerrar a sessão..." 10
 
-    $btn = New-Object System.Windows.Forms.Button
-    $btn.Text = $Text
-    $btn.Location = New-Object System.Drawing.Point($X,$Y)
-    $btn.Size = New-Object System.Drawing.Size($Width,30)
-    $btn.FlatStyle = "Flat"
-    $btn.FlatAppearance.BorderColor = [System.Drawing.Color]::Lime
-    $btn.FlatAppearance.BorderSize = 1
-    $btn.BackColor = [System.Drawing.Color]::Black
-    $btn.ForeColor = [System.Drawing.Color]::Lime
-    $btn.Font = New-Object System.Drawing.Font("Consolas", 9)
-    return $btn
-}
-
-# Botão Kaspersky
-$btnKaspersky = New-TerminalButton "OPEN KASPERSKY SITE" 15 360 200
-$btnKaspersky.Add_Click({
-    Start-Process "https://www.kaspersky.com.br"
+$form.KeyPreview = $true
+$form.Add_KeyDown({
+    if ($_.KeyCode -eq "Escape") {
+        $form.Close()
+    }
 })
-$form.Controls.Add($btnKaspersky)
 
-# Botão FortSecure
-$btnFortSecure = New-TerminalButton "OPEN FORTSECURE SITE" 230 360 220
-$btnFortSecure.Add_Click({
-    Start-Process "https://www.fortsecure.com.br"
+# ================================
+# LOOP DE LOGS (SIMULAÇÃO SOC)
+# ================================
+$timer = New-Object System.Windows.Forms.Timer
+$timer.Interval = 2500
+$timer.Add_Tick({
+    $events = @(
+        "User behavior monitored",
+        "No suspicious activity detected",
+        "Email filtering operational",
+        "Endpoint protected",
+        "MFA enforcement active"
+    )
+    $msg = $events | Get-Random
+    Write-Log "INFO" $msg
 })
-$form.Controls.Add($btnFortSecure)
+$timer.Start()
 
-# Botão OK / EXIT
-$btnOK = New-TerminalButton "EXIT" 470 360 150
-$btnOK.Add_Click({
-    $form.Close()
-})
-$form.Controls.Add($btnOK)
-
-# Ícone
-$form.Icon = [System.Drawing.SystemIcons]::Shield
-
-# Exibir
-$form.ShowDialog() | Out-Null
+[System.Windows.Forms.Application]::Run($form)
