@@ -1,105 +1,113 @@
-# AlertaAntivirus_Fullscreen.ps1
+# AlertaSeguranca_Apresentacao_Cliente.ps1
 
 Add-Type -AssemblyName System.Windows.Forms
 
-# Som de alerta para chamar atenção
-[System.Media.SystemSounds]::Exclamation.Play()
+# Som sutil de alerta (opcional - comente se preferir silêncio na apresentação)
+[System.Media.SystemSounds]::Asterisk.Play()
 
-# Mensagem corrigida e bem formatada
+# Texto principal - limpo e profissional
 $mensagem = @"
-ATENÇÃO: Seu computador está vulnerável AGORA MESMO!
+ATENÇÃO
 
-Sem um antivírus ativo e atualizado, você corre riscos sérios todos os dias:
+Seu ambiente está vulnerável no momento.
 
-• Clique em link ou anexo errado → invasão imediata (phishing é o #1)
-• Senha fraca ou reutilizada → criminosos acessam e-mail, bancos, redes sociais
-• Sem autenticação em dois fatores (2FA) → uma senha vazada = perda total da conta
-• Windows ou programas desatualizados → exploits conhecidos entram em segundos
+Riscos identificados sem proteção ativa:
+• Phishing e anexos maliciosos – principal vetor de invasão
+• Credenciais fracas ou reutilizadas – acesso fácil a contas críticas
+• Ausência de autenticação em dois fatores (2FA) – perda total com vazamento de senha
+• Softwares e sistema desatualizados – exploração por vulnerabilidades conhecidas
 
-Não espere o pior acontecer.
-Proteja-se HOJE com soluções confiáveis e reconhecidas.
+A proteção imediata é essencial para mitigar esses riscos.
 
-Escolha uma opção abaixo:
+Selecione uma solução recomendada:
 "@
 
-# Cria o formulário em modo fullscreen real
-$form = New-Object System.Windows.Forms.Form
-$form.Text = "🚨 ALERTA DE SEGURANÇA – AÇÃO NECESSÁRIA"
-$form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::None          # Sem bordas
-$form.Bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds           # Ocupa tela inteira
-$form.TopMost = $true                                                        # Sempre no topo
-$form.ShowInTaskbar = $false                                                 # Não aparece na barra de tarefas
-$form.BackColor = [System.Drawing.Color]::FromArgb(255, 245, 230)            # Fundo amarelado de alerta
+# Cria formulário fullscreen sem bordas
+$form                  = New-Object System.Windows.Forms.Form
+$form.FormBorderStyle  = [System.Windows.Forms.FormBorderStyle]::None
+$form.WindowState      = [System.Windows.Forms.FormWindowState]::Maximized
+$form.TopMost          = $true
+$form.ShowInTaskbar    = $false
+$form.BackColor        = [System.Drawing.Color]::FromArgb(245, 245, 247)   # Cinza claro clean
+$form.Bounds           = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
 
-# Ícone de warning maior e centralizado melhor
+# Ícone de alerta (amarelo, discreto)
 $picture = New-Object System.Windows.Forms.PictureBox
-$picture.Image = [System.Drawing.SystemIcons]::Warning.ToBitmap()
-$picture.SizeMode = "StretchImage"
-$picture.Size = New-Object System.Drawing.Size(100, 100)
-$picture.Location = New-Object System.Drawing.Point(($form.ClientSize.Width - 100)/2 - 260, 40)
+$picture.Image       = [System.Drawing.SystemIcons]::Warning.ToBitmap()
+$picture.SizeMode    = "StretchImage"
+$picture.Size        = New-Object System.Drawing.Size(90,90)
+$picture.Location    = New-Object System.Drawing.Point( ($form.Width/2 - 45), 80 )
 $form.Controls.Add($picture)
 
-# Label da mensagem - ajustado para tela grande
+# Título grande
+$lblTitulo = New-Object System.Windows.Forms.Label
+$lblTitulo.Text          = "ALERTA DE SEGURANÇA"
+$lblTitulo.AutoSize      = $true
+$lblTitulo.Font          = New-Object System.Drawing.Font("Segoe UI Semibold", 32, [System.Drawing.FontStyle]::Bold)
+$lblTitulo.ForeColor     = [System.Drawing.Color]::FromArgb(220, 53, 69)  # Vermelho suave
+$lblTitulo.Location      = New-Object System.Drawing.Point( ($form.Width/2 - ($lblTitulo.Width/2)), 200 )
+$form.Controls.Add($lblTitulo)
+
+# Mensagem principal - centralizada
 $label = New-Object System.Windows.Forms.Label
-$label.Text = $mensagem
-$label.AutoSize = $false
-$label.Size = New-Object System.Drawing.Size(800, 340)
-$label.Location = New-Object System.Drawing.Point(($form.ClientSize.Width - 800)/2, 160)
-$label.Font = New-Object System.Drawing.Font("Segoe UI", 13)
-$label.ForeColor = [System.Drawing.Color]::DarkRed
-$label.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
+$label.Text       = $mensagem
+$label.AutoSize   = $false
+$label.Size       = New-Object System.Drawing.Size( ($form.Width - 300), 320 )
+$label.Location   = New-Object System.Drawing.Point( ($form.Width/2 - ($label.Width/2)), 280 )
+$label.Font       = New-Object System.Drawing.Font("Segoe UI", 14)
+$label.ForeColor  = [System.Drawing.Color]::FromArgb(33, 37, 41)
+$label.TextAlign  = [System.Drawing.ContentAlignment]::MiddleCenter
 $form.Controls.Add($label)
 
-# Painel para os botões (centralizado)
-$panel = New-Object System.Windows.Forms.Panel
-$panel.Size = New-Object System.Drawing.Size(560, 140)
-$panel.Location = New-Object System.Drawing.Point(($form.ClientSize.Width - 560)/2, $form.ClientSize.Height - 240)
-$panel.BackColor = [System.Drawing.Color]::Transparent
-$form.Controls.Add($panel)
-
-# Botão Kaspersky
+# Botão Kaspersky - centralizado à esquerda
 $btnKaspersky = New-Object System.Windows.Forms.Button
-$btnKaspersky.Text = "Instalar Kaspersky"
-$btnKaspersky.Size = New-Object System.Drawing.Size(260, 60)
-$btnKaspersky.Location = New-Object System.Drawing.Point(0, 20)
-$btnKaspersky.Font = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Bold)
-$btnKaspersky.BackColor = [System.Drawing.Color]::LightGreen
-$btnKaspersky.Add_Click({
-    Start-Process "https://www.kaspersky.com.br/"
-    $form.Close()
-})
-$panel.Controls.Add($btnKaspersky)
+$btnKaspersky.Text       = "Instalar Kaspersky Agora"
+$btnKaspersky.Size       = New-Object System.Drawing.Size(320, 70)
+$btnKaspersky.Location   = New-Object System.Drawing.Point( ($form.Width/2 - 340), ($form.Height - 220) )
+$btnKaspersky.Font       = New-Object System.Drawing.Font("Segoe UI Semibold", 14, [System.Drawing.FontStyle]::Bold)
+$btnKaspersky.BackColor  = [System.Drawing.Color]::FromArgb(0, 123, 255)   # Azul profissional
+$btnKaspersky.ForeColor  = [System.Drawing.Color]::White
+$btnKaspersky.FlatStyle  = "Flat"
+$btnKaspersky.FlatAppearance.BorderSize = 0
+$btnKaspersky.Add_Click({ Start-Process "https://www.kaspersky.com.br/" })
+$form.Controls.Add($btnKaspersky)
 
-# Botão Fort Secure
+# Botão Fort Secure - centralizado à direita
 $btnFortSecure = New-Object System.Windows.Forms.Button
-$btnFortSecure.Text = "Conhecer Fort Secure (Brasil)"
-$btnFortSecure.Size = New-Object System.Drawing.Size(260, 60)
-$btnFortSecure.Location = New-Object System.Drawing.Point(280, 20)
-$btnFortSecure.Font = New-Object System.Drawing.Font("Segoe UI", 11, [System.Drawing.FontStyle]::Bold)
-$btnFortSecure.BackColor = [System.Drawing.Color]::LightBlue
-$btnFortSecure.Add_Click({
-    Start-Process "https://fortsecure.com.br/"
-    $form.Close()
-})
-$panel.Controls.Add($btnFortSecure)
+$btnFortSecure.Text       = "Conhecer Fort Secure"
+$btnFortSecure.Size       = New-Object System.Drawing.Size(320, 70)
+$btnFortSecure.Location   = New-Object System.Drawing.Point( ($form.Width/2 + 20), ($form.Height - 220) )
+$btnFortSecure.Font       = New-Object System.Drawing.Font("Segoe UI Semibold", 14, [System.Drawing.FontStyle]::Bold)
+$btnFortSecure.BackColor  = [System.Drawing.Color]::FromArgb(40, 167, 69)  # Verde confiança
+$btnFortSecure.ForeColor  = [System.Drawing.Color]::White
+$btnFortSecure.FlatStyle  = "Flat"
+$btnFortSecure.FlatAppearance.BorderSize = 0
+$btnFortSecure.Add_Click({ Start-Process "https://fortsecure.com.br/" })
+$form.Controls.Add($btnFortSecure)
 
-# Botão Fechar (troll leve)
-$btnCancelar = New-Object System.Windows.Forms.Button
-$btnCancelar.Text = "Fechar (não recomendo)"
-$btnCancelar.Size = New-Object System.Drawing.Size(220, 45)
-$btnCancelar.Location = New-Object System.Drawing.Point(($form.ClientSize.Width - 220)/2, $form.ClientSize.Height - 60)
-$btnCancelar.Font = New-Object System.Drawing.Font("Segoe UI", 10)
-$btnCancelar.BackColor = [System.Drawing.Color]::LightGray
-$btnCancelar.Add_Click({
-    $form.Close()
-})
-$form.Controls.Add($btnCancelar)
+# Botão Fechar (discreto, mas mantido para o troll opcional)
+$btnFechar = New-Object System.Windows.Forms.Button
+$btnFechar.Text       = "Fechar"
+$btnFechar.Size       = New-Object System.Drawing.Size(180, 50)
+$btnFechar.Location   = New-Object System.Drawing.Point( ($form.Width/2 - 90), ($form.Height - 100) )
+$btnFechar.Font       = New-Object System.Drawing.Font("Segoe UI", 11)
+$btnFechar.BackColor  = [System.Drawing.Color]::FromArgb(108, 117, 125)
+$btnFechar.ForeColor  = [System.Drawing.Color]::White
+$btnFechar.FlatStyle  = "Flat"
+$btnFechar.FlatAppearance.BorderSize = 0
+$btnFechar.Add_Click({ $form.Close() })
+$form.Controls.Add($btnFechar)
 
-# Se tentar fechar (X do Alt+F4), reaparece após 3 segundos
+# Reaparece se tentar fechar (comente esta parte na apresentação real se não quiser troll)
 $form.Add_FormClosing({
     Start-Sleep -Seconds 3
     & $PSCommandPath
 })
 
-# Mostra a janela em fullscreen
+# Força foco e exibição
+$form.Add_Shown({
+    $form.Activate()
+    $form.BringToFront()
+})
+
 $form.ShowDialog() | Out-Null
