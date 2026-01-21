@@ -2,10 +2,10 @@
 
 Add-Type -AssemblyName System.Windows.Forms
 
-# Som sutil de alerta (opcional - comente se preferir silêncio na apresentação)
+# Som sutil de alerta (opcional - comente se preferir silêncio)
 [System.Media.SystemSounds]::Asterisk.Play()
 
-# Texto principal - limpo e profissional
+# Texto principal - mantido em português
 $mensagem = @"
 ATENÇÃO
 
@@ -22,10 +22,15 @@ A proteção imediata é essencial para mitigar esses riscos.
 Selecione uma solução recomendada:
 "@
 
+# Caracteres sensíveis construídos via código (evita problemas de layout ABNT2/US)
+$colon = [char]58          # :
+$slash = [char]47          # /
+$httpsPrefix = 'https' + $colon + $slash + $slash
+
 # Cria formulário fullscreen sem bordas
 $form                  = New-Object System.Windows.Forms.Form
 $form.FormBorderStyle  = [System.Windows.Forms.FormBorderStyle]::None
-$form.WindowState      = [System.Windows.Forms.FormWindowState]::Maximized
+$form.WindowState      = [System.Windows.Forms.WindowState]::Maximized
 $form.TopMost          = $true
 $form.ShowInTaskbar    = $false
 $form.BackColor        = [System.Drawing.Color]::FromArgb(245, 245, 247)   # Cinza claro clean
@@ -34,18 +39,18 @@ $form.Bounds           = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
 # Ícone de alerta (amarelo, discreto)
 $picture = New-Object System.Windows.Forms.PictureBox
 $picture.Image       = [System.Drawing.SystemIcons]::Warning.ToBitmap()
-$picture.SizeMode    = "StretchImage"
+$picture.SizeMode    = [System.Windows.Forms.PictureBoxSizeMode]::StretchImage
 $picture.Size        = New-Object System.Drawing.Size(90,90)
 $picture.Location    = New-Object System.Drawing.Point( ($form.Width/2 - 45), 80 )
 $form.Controls.Add($picture)
 
 # Título grande
 $lblTitulo = New-Object System.Windows.Forms.Label
-$lblTitulo.Text          = "ALERTA DE SEGURANÇA"
-$lblTitulo.AutoSize      = $true
-$lblTitulo.Font          = New-Object System.Drawing.Font("Segoe UI Semibold", 32, [System.Drawing.FontStyle]::Bold)
-$lblTitulo.ForeColor     = [System.Drawing.Color]::FromArgb(220, 53, 69)  # Vermelho suave
-$lblTitulo.Location      = New-Object System.Drawing.Point( ($form.Width/2 - ($lblTitulo.Width/2)), 200 )
+$lblTitulo.Text       = "ALERTA DE SEGURANÇA"
+$lblTitulo.AutoSize   = $true
+$lblTitulo.Font       = New-Object System.Drawing.Font("Segoe UI Semibold", 32, [System.Drawing.FontStyle]::Bold)
+$lblTitulo.ForeColor  = [System.Drawing.Color]::FromArgb(220, 53, 69)  # Vermelho suave
+$lblTitulo.TextAlign  = [System.Drawing.ContentAlignment]::MiddleCenter
 $form.Controls.Add($lblTitulo)
 
 # Mensagem principal - centralizada
@@ -67,9 +72,11 @@ $btnKaspersky.Location   = New-Object System.Drawing.Point( ($form.Width/2 - 340
 $btnKaspersky.Font       = New-Object System.Drawing.Font("Segoe UI Semibold", 14, [System.Drawing.FontStyle]::Bold)
 $btnKaspersky.BackColor  = [System.Drawing.Color]::FromArgb(0, 123, 255)   # Azul profissional
 $btnKaspersky.ForeColor  = [System.Drawing.Color]::White
-$btnKaspersky.FlatStyle  = "Flat"
+$btnKaspersky.FlatStyle  = [System.Windows.Forms.FlatStyle]::Flat
 $btnKaspersky.FlatAppearance.BorderSize = 0
-$btnKaspersky.Add_Click({ Start-Process "https://www.kaspersky.com.br/" })
+$btnKaspersky.Add_Click({
+    Start-Process ($httpsPrefix + 'www.kaspersky.com.br/')
+})
 $form.Controls.Add($btnKaspersky)
 
 # Botão Fort Secure - centralizado à direita
@@ -80,12 +87,14 @@ $btnFortSecure.Location   = New-Object System.Drawing.Point( ($form.Width/2 + 20
 $btnFortSecure.Font       = New-Object System.Drawing.Font("Segoe UI Semibold", 14, [System.Drawing.FontStyle]::Bold)
 $btnFortSecure.BackColor  = [System.Drawing.Color]::FromArgb(40, 167, 69)  # Verde confiança
 $btnFortSecure.ForeColor  = [System.Drawing.Color]::White
-$btnFortSecure.FlatStyle  = "Flat"
+$btnFortSecure.FlatStyle  = [System.Windows.Forms.FlatStyle]::Flat
 $btnFortSecure.FlatAppearance.BorderSize = 0
-$btnFortSecure.Add_Click({ Start-Process "https://fortsecure.com.br/" })
+$btnFortSecure.Add_Click({
+    Start-Process ($httpsPrefix + 'fortsecure.com.br/')
+})
 $form.Controls.Add($btnFortSecure)
 
-# Botão Fechar (discreto, mas mantido para o troll opcional)
+# Botão Fechar (discreto)
 $btnFechar = New-Object System.Windows.Forms.Button
 $btnFechar.Text       = "Fechar"
 $btnFechar.Size       = New-Object System.Drawing.Size(180, 50)
@@ -93,21 +102,29 @@ $btnFechar.Location   = New-Object System.Drawing.Point( ($form.Width/2 - 90), (
 $btnFechar.Font       = New-Object System.Drawing.Font("Segoe UI", 11)
 $btnFechar.BackColor  = [System.Drawing.Color]::FromArgb(108, 117, 125)
 $btnFechar.ForeColor  = [System.Drawing.Color]::White
-$btnFechar.FlatStyle  = "Flat"
+$btnFechar.FlatStyle  = [System.Windows.Forms.FlatStyle]::Flat
 $btnFechar.FlatAppearance.BorderSize = 0
 $btnFechar.Add_Click({ $form.Close() })
 $form.Controls.Add($btnFechar)
 
-# Reaparece se tentar fechar (comente esta parte na apresentação real se não quiser troll)
-$form.Add_FormClosing({
-    Start-Sleep -Seconds 3
-    & $PSCommandPath
-})
-
-# Força foco e exibição
+# Centraliza o título corretamente
 $form.Add_Shown({
+    $lblTitulo.Left = [math]::Round( ($form.ClientSize.Width - $lblTitulo.Width) / 2 )
+    $lblTitulo.Top  = 200
     $form.Activate()
     $form.BringToFront()
 })
+
+# Opcional: manter centralizado em resize (geralmente desnecessário em fullscreen)
+$form.Add_Resize({
+    $lblTitulo.Left = [math]::Round( ($form.ClientSize.Width - $lblTitulo.Width) / 2 )
+})
+
+# Reaparece se tentar fechar (COMENTADO por padrão - descomente se quiser o efeito "troll")
+# $form.Add_FormClosing({
+#     Start-Sleep -Seconds 3
+#     & $PSCommandPath
+#     $_.Cancel = $true
+# })
 
 $form.ShowDialog() | Out-Null
