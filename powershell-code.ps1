@@ -1,151 +1,114 @@
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
-# ================================
-# CONFIGURAÇÕES VISUAIS
-# ================================
-$bgColor   = [System.Drawing.Color]::Black
-$textColor = [System.Drawing.Color]::Lime
-$font      = New-Object System.Drawing.Font("Consolas", 11)
-
-# ================================
-# FORM PRINCIPAL (FULLSCREEN)
-# ================================
+# ======================
+# FORM FULLSCREEN
+# ======================
 $form = New-Object System.Windows.Forms.Form
-$form.Text = "SOC TERMINAL - SECURITY AWARENESS"
+$form.Text = "SOC Security Awareness Console"
 $form.WindowState = "Maximized"
 $form.FormBorderStyle = "None"
 $form.TopMost = $true
-$form.BackColor = $bgColor
-$form.ForeColor = $textColor
-$form.Font = $font
-$form.Icon = [System.Drawing.SystemIcons]::Shield
+$form.BackColor = [System.Drawing.Color]::Black
+$form.ForeColor = [System.Drawing.Color]::Lime
+$form.Font = New-Object System.Drawing.Font("Consolas", 11)
+$form.KeyPreview = $true
 
-# ================================
-# TEXTBOX TERMINAL
-# ================================
+# ======================
+# TERMINAL
+# ======================
 $terminal = New-Object System.Windows.Forms.TextBox
 $terminal.Multiline = $true
 $terminal.ReadOnly = $true
-$terminal.ScrollBars = "Vertical"
 $terminal.Dock = "Fill"
-$terminal.BackColor = $bgColor
-$terminal.ForeColor = $textColor
+$terminal.ScrollBars = "Vertical"
+$terminal.BackColor = [System.Drawing.Color]::Black
+$terminal.ForeColor = [System.Drawing.Color]::Lime
 $terminal.BorderStyle = "None"
-$terminal.Font = $font
+$terminal.Font = $form.Font
 $form.Controls.Add($terminal)
 
-# ================================
-# FUNÇÃO: EFEITO DE DIGITAÇÃO
-# ================================
+# ======================
+# FUNÇÕES SEGURAS
+# ======================
 function Write-Terminal {
-    param (
-        [string]$Text,
-        [int]$Delay = 20
-    )
+    param ($Text, $Delay = 15)
 
-    foreach ($char in $Text.ToCharArray()) {
-        $terminal.AppendText($char)
+    foreach ($c in $Text.ToCharArray()) {
+        $terminal.AppendText($c)
         Start-Sleep -Milliseconds $Delay
-        $terminal.Refresh()
+        [System.Windows.Forms.Application]::DoEvents()
     }
 }
 
-# ================================
-# FUNÇÃO: LOG SOC
-# ================================
 function Write-Log {
-    param (
-        [string]$Level,
-        [string]$Message
-    )
-
-    $timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
-    Write-Terminal "[$timestamp] [$Level] $Message`r`n" 5
+    param ($Level, $Message)
+    $ts = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+    Write-Terminal "[$ts] [$Level] $Message`r`n" 5
 }
 
-# ================================
-# INICIALIZAÇÃO
-# ================================
-$form.Show()
-$form.Refresh()
-
-Write-Terminal "Initializing SOC Security Awareness Console...`r`n`r`n" 15
-Start-Sleep 1
-
-Write-Log "INFO"  "Loading security modules"
-Start-Sleep 1
-Write-Log "INFO"  "Checking endpoint posture"
-Start-Sleep 1
-Write-Log "INFO"  "Validating user security awareness baseline"
-Start-Sleep 1
-Write-Log "OK"    "All systems operational"
-Start-Sleep 1
-
-Write-Terminal "`r`n--- SECURITY AWARENESS MESSAGE ---`r`n`r`n" 15
-
-# ================================
-# MENSAGEM PRINCIPAL
-# ================================
-$mensagem = @"
-Prezado usuário,
-
-A segurança da informação é uma responsabilidade compartilhada.
-
-A maioria dos incidentes de segurança ocorre por:
-- Phishing
-- Senhas fracas
-- Falta de MFA
-- Sistemas desatualizados
-- Uso de dispositivos USB desconhecidos
-
-Ferramentas como FortSecure e Kaspersky fornecem
-camadas avançadas de proteção, porém:
-
->>> O USUÁRIO CONTINUA SENDO O PRINCIPAL ELEMENTO DE DEFESA <<<
-
-Pratique segurança. Questione. Reporte.
-
-SOC - Security Operations Center
-"@
-
-Write-Terminal $mensagem 18
-
-# ================================
-# LOGS FINAIS
-# ================================
-Start-Sleep 1
-Write-Log "INFO" "Security awareness message delivered successfully"
-Write-Log "INFO" "Monitoring continues..."
-
-# ================================
-# TECLA PARA SAIR (STEALTH)
-# ================================
-Write-Terminal "`r`nPressione ESC para encerrar a sessão..." 10
-
-$form.KeyPreview = $true
+# ======================
+# SAIR COM ESC
+# ======================
 $form.Add_KeyDown({
-    if ($_.KeyCode -eq "Escape") {
+    if ($_.KeyCode -eq 'Escape') {
         $form.Close()
     }
 })
 
-# ================================
-# LOOP DE LOGS (SIMULAÇÃO SOC)
-# ================================
+# ======================
+# TIMER DE LOGS
+# ======================
 $timer = New-Object System.Windows.Forms.Timer
 $timer.Interval = 2500
 $timer.Add_Tick({
     $events = @(
+        "Endpoint protection active",
+        "Email security operational",
+        "No threats detected",
         "User behavior monitored",
-        "No suspicious activity detected",
-        "Email filtering operational",
-        "Endpoint protected",
-        "MFA enforcement active"
+        "MFA enforcement validated"
     )
-    $msg = $events | Get-Random
-    Write-Log "INFO" $msg
+    Write-Log "INFO" ($events | Get-Random)
 })
-$timer.Start()
 
+# ======================
+# EVENTO LOAD (INÍCIO)
+# ======================
+$form.Add_Shown({
+
+    Write-Terminal "Initializing SOC Security Awareness Console...`r`n`r`n" 20
+
+    Write-Log "INFO" "Loading security modules"
+    Write-Log "INFO" "Checking endpoint posture"
+    Write-Log "OK"   "Environment secure"
+
+    Write-Terminal "`r`n--- SECURITY AWARENESS ---`r`n`r`n" 15
+
+    $msg = @"
+A segurança da informação é uma responsabilidade compartilhada.
+
+Principais riscos:
+- Phishing
+- Senhas fracas
+- Falta de MFA
+- Sistemas desatualizados
+- USBs desconhecidos
+
+Ferramentas ajudam.
+Usuários conscientes protegem.
+
+SOC - Security Operations Center
+"@
+
+    Write-Terminal $msg 18
+
+    Write-Terminal "`r`nPressione ESC para encerrar...`r`n" 10
+
+    $timer.Start()
+})
+
+# ======================
+# RUN
+# ======================
 [System.Windows.Forms.Application]::Run($form)
