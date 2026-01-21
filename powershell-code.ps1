@@ -1,81 +1,98 @@
 # conscientizacao-seguranca-profissional.ps1
-# Script educativo para conscientização sobre segurança digital
-# Desenvolvido para promover boas práticas de cibersegurança
+# Interface estilo terminal (CMD / PowerShell)
 
-Add-Type -AssemblyName PresentationFramework
 Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
 
-# Mensagem principal - tom profissional e objetivo
+# Mensagem
 $mensagem = @"
 Prezado usuário,
 
-A segurança digital é uma responsabilidade compartilhada. Pequenas ações diárias podem fazer uma grande diferença na proteção dos seus dados e dispositivos.
+A segurança digital é uma responsabilidade compartilhada.
+Pequenas ações diárias fazem grande diferença.
 
 DICAS ESSENCIAIS DE CIBERSEGURANÇA:
 
-1. Evite clicar em links ou abrir anexos de fontes desconhecidas ou suspeitas.
-2. Utilize senhas fortes, únicas para cada serviço e considere um gerenciador de senhas confiável.
-3. Ative a autenticação de dois fatores (2FA/MFA) em todas as contas que ofereçam essa opção.
-4. Mantenha sempre atualizados o sistema operacional, navegadores, aplicativos e soluções de segurança.
-5. Tenha extremo cuidado com dispositivos USB de origem desconhecida — eles são um dos vetores de ataque mais comuns.
+[1] Não clique em links ou anexos suspeitos
+[2] Utilize senhas fortes e exclusivas
+[3] Ative MFA sempre que possível
+[4] Mantenha sistemas e softwares atualizados
+[5] Nunca utilize USBs desconhecidos
 
-Soluções profissionais como as oferecidas pela FortSecure e pela Kaspersky trabalham em conjunto para oferecer camadas robustas de proteção. Porém, a conscientização e as boas práticas do usuário continuam sendo o elemento mais importante na defesa contra ameaças cibernéticas.
-
-Fique seguro e protegido.
+Soluções como FortSecure e Kaspersky
+fornecem proteção avançada, porém
+o fator humano continua sendo o mais crítico.
 
 Atenciosamente,
 Equipe de Conscientização em Cibersegurança
 "@
 
-# Cria uma janela personalizada com botões adicionais
+# Janela principal
 $form = New-Object System.Windows.Forms.Form
-$form.Text = "Conscientização em Cibersegurança"
-$form.Size = New-Object System.Drawing.Size(550,420)
+$form.Text = "Security Awareness Console"
+$form.Size = New-Object System.Drawing.Size(650,450)
 $form.StartPosition = "CenterScreen"
 $form.FormBorderStyle = "FixedDialog"
 $form.MaximizeBox = $false
 $form.MinimizeBox = $false
+$form.BackColor = [System.Drawing.Color]::Black
+$form.ForeColor = [System.Drawing.Color]::Lime
+$form.Font = New-Object System.Drawing.Font("Consolas", 10)
 
-$label = New-Object System.Windows.Forms.Label
-$label.Location = New-Object System.Drawing.Point(20,20)
-$label.Size = New-Object System.Drawing.Size(500,280)
-$label.Text = $mensagem
-$label.Font = New-Object System.Drawing.Font("Segoe UI", 10)
-$form.Controls.Add($label)
+# Caixa de texto estilo terminal
+$textBox = New-Object System.Windows.Forms.TextBox
+$textBox.Location = New-Object System.Drawing.Point(15,15)
+$textBox.Size = New-Object System.Drawing.Size(605,320)
+$textBox.Multiline = $true
+$textBox.ReadOnly = $true
+$textBox.ScrollBars = "Vertical"
+$textBox.BackColor = [System.Drawing.Color]::Black
+$textBox.ForeColor = [System.Drawing.Color]::Lime
+$textBox.BorderStyle = "FixedSingle"
+$textBox.Font = New-Object System.Drawing.Font("Consolas", 10)
+$textBox.Text = $mensagem
+$form.Controls.Add($textBox)
 
-# Botão OK
-$btnOK = New-Object System.Windows.Forms.Button
-$btnOK.Location = New-Object System.Drawing.Point(290,330)
-$btnOK.Size = New-Object System.Drawing.Size(80,30)
-$btnOK.Text = "OK"
-$btnOK.DialogResult = [System.Windows.Forms.DialogResult]::OK
-$form.AcceptButton = $btnOK
-$form.Controls.Add($btnOK)
+# Função para criar botões estilo terminal
+function New-TerminalButton {
+    param ($Text, $X, $Y, $Width)
+
+    $btn = New-Object System.Windows.Forms.Button
+    $btn.Text = $Text
+    $btn.Location = New-Object System.Drawing.Point($X,$Y)
+    $btn.Size = New-Object System.Drawing.Size($Width,30)
+    $btn.FlatStyle = "Flat"
+    $btn.FlatAppearance.BorderColor = [System.Drawing.Color]::Lime
+    $btn.FlatAppearance.BorderSize = 1
+    $btn.BackColor = [System.Drawing.Color]::Black
+    $btn.ForeColor = [System.Drawing.Color]::Lime
+    $btn.Font = New-Object System.Drawing.Font("Consolas", 9)
+    return $btn
+}
 
 # Botão Kaspersky
-$btnKaspersky = New-Object System.Windows.Forms.Button
-$btnKaspersky.Location = New-Object System.Drawing.Point(20,330)
-$btnKaspersky.Size = New-Object System.Drawing.Size(140,30)
-$btnKaspersky.Text = "Site Kaspersky"
-$btnKaspersky.BackColor = [System.Drawing.Color]::LightBlue
+$btnKaspersky = New-TerminalButton "OPEN KASPERSKY SITE" 15 360 200
 $btnKaspersky.Add_Click({
     Start-Process "https://www.kaspersky.com.br"
 })
 $form.Controls.Add($btnKaspersky)
 
 # Botão FortSecure
-$btnFortSecure = New-Object System.Windows.Forms.Button
-$btnFortSecure.Location = New-Object System.Drawing.Point(170,330)
-$btnFortSecure.Size = New-Object System.Drawing.Size(110,30)
-$btnFortSecure.Text = "Site FortSecure"
-$btnFortSecure.BackColor = [System.Drawing.Color]::LightGreen
+$btnFortSecure = New-TerminalButton "OPEN FORTSECURE SITE" 230 360 220
 $btnFortSecure.Add_Click({
     Start-Process "https://www.fortsecure.com.br"
 })
 $form.Controls.Add($btnFortSecure)
 
-# Ícone de informação na janela
-$form.Icon = [System.Drawing.SystemIcons]::Information
+# Botão OK / EXIT
+$btnOK = New-TerminalButton "EXIT" 470 360 150
+$btnOK.Add_Click({
+    $form.Close()
+})
+$form.Controls.Add($btnOK)
 
-# Mostra a janela como diálogo
+# Ícone
+$form.Icon = [System.Drawing.SystemIcons]::Shield
+
+# Exibir
 $form.ShowDialog() | Out-Null
